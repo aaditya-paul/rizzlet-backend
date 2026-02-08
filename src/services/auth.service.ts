@@ -94,9 +94,11 @@ const generateToken = (userId: string, email: string): string => {
     email,
   };
 
-  return jwt.sign(payload, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn,
-  });
+  const options: jwt.SignOptions = {
+    expiresIn: config.jwt.expiresIn as any,
+  };
+
+  return jwt.sign(payload, config.jwt.secret as jwt.Secret, options);
 };
 
 export default {
