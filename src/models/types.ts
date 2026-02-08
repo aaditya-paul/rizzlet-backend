@@ -48,7 +48,9 @@ export interface ReplyOption {
 }
 
 export interface GenerateReplyRequest {
-  conversation: ConversationContext;
+  conversation?: ConversationContext; // Structured conversation (legacy)
+  conversationText?: string; // Raw text for AI parsing (new)
+  userIdentifier?: string; // Optional: user's name to help AI identify who is who
   tone: ToneMode;
   count?: number; // Number of reply options to generate (default 3)
 }

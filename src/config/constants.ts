@@ -1,7 +1,23 @@
+export const AI_PROVIDERS = {
+  GEMINI: "gemini",
+  GROQ: "groq",
+} as const;
+
+export const GEMINI_MODELS = {
+  FLASH: "gemini-2.5-flash", // Primary model - fast and efficient
+};
+
 export const GROQ_MODELS = {
-  FAST: "llama-3.1-8b-instant", // Primary model for most requests
+  FAST: "llama-3.1-8b-instant", // Secondary model for most requests
   POWERFUL: "llama-3.1-70b-versatile", // Fallback for complex queries
 };
+
+// Provider priority: Gemini -> Groq Powerful -> Groq Fast
+export const MODEL_PRIORITY = [
+  { provider: AI_PROVIDERS.GEMINI, model: GEMINI_MODELS.FLASH },
+  { provider: AI_PROVIDERS.GROQ, model: GROQ_MODELS.POWERFUL },
+  { provider: AI_PROVIDERS.GROQ, model: GROQ_MODELS.FAST },
+];
 
 export const TONE_DESCRIPTIONS = {
   safe: "Friendly, respectful, and low-risk. Good for early conversations.",
