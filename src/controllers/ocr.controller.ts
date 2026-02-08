@@ -1,9 +1,6 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
-import {
-  extractTextFromImage,
-  parseOCRConversation,
-} from "../services/ocr.service";
+import { extractTextFromImage } from "../services/ocr.service";
 import { HTTP_STATUS } from "../config/constants";
 
 export const processImage = async (
@@ -42,23 +39,13 @@ export const processImage = async (
     console.log(text);
     console.log("─".repeat(80));
 
-    // Parse conversation
-    console.log("\n🔍 [OCR] Parsing conversation from extracted text...");
-    const messages = parseOCRConversation(text);
-
-    console.log("✅ [OCR] Conversation parsing completed");
-    console.log(`📊 [OCR] Found ${messages.length} messages`);
-    console.log("\n💬 [OCR] Parsed messages:");
-    messages.forEach((msg, idx) => {
-      console.log(`   [${idx + 1}] ${msg.sender}: ${msg.text}`);
-    });
+    console.log("\n✅ [OCR] Returning text to frontend for AI parsing");
+    console.log("💡 [OCR] Frontend will use the same AI parsing as text input");
     console.log("=".repeat(80) + "\n");
 
     res.status(HTTP_STATUS.OK).json({
       text,
       confidence,
-      messages,
-      message_count: messages.length,
     });
   } catch (error: any) {
     console.error("\n❌ [OCR Controller] Error:", error);
