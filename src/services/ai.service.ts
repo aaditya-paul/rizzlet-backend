@@ -376,6 +376,7 @@ export const parseAndGenerateReplies = async (
     const prompt = getBatchedParsingAndReplyPrompt(
       request.conversationText,
       request.tone,
+      request.lastMessageWasUser ?? false,
       request.userIdentifier,
     );
 

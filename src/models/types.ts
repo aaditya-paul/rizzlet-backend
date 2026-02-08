@@ -51,6 +51,7 @@ export interface GenerateReplyRequest {
   conversation?: ConversationContext; // Structured conversation (legacy)
   conversationText?: string; // Raw text for AI parsing (new)
   userIdentifier?: string; // Optional: user's name to help AI identify who is who
+  lastMessageWasUser?: boolean; // Whether the last message was sent by the user (true = followup, false = reply)
   tone: ToneMode;
   count?: number; // Number of reply options to generate (default 3)
 }

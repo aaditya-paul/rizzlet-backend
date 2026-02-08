@@ -1,81 +1,177 @@
-import Tesseract from "tesseract.js";
+import groq from "../config/llama";
+import genAI from "../config/gemini";
+import { AI_PROVIDERS, VISION_MODEL_PRIORITY } from "../config/constants";
+import { getVisionOCRPrompt } from "../prompts/visionOCR";
 import sharp from "sharp";
 
+interface VisionOCRResult {
+  platform: string;
+  messages: Array<{ sender: "user" | "other"; text: string }>;
+  confidence: number;
+}
+
 /**
- * Extracts text from an image buffer using Tesseract OCR
+ * Extract conversation from image using vision AI with fallback
+ * Optimized for cost: compresses image and uses free tier friendly models
  */
-export const extractTextFromImage = async (
+export const extractConversationFromImage = async (
   imageBuffer: Buffer,
-): Promise<{ text: string; confidence: number }> => {
+): Promise<VisionOCRResult> => {
+  console.log("\n" + "=".repeat(80));
+  console.log("👁️  [VISION OCR] Starting vision-based conversation extraction");
+  console.log("=".repeat(80));
+
   try {
-    console.log("🖼️  [OCR Service] Preprocessing image...");
-    // Optimize image for OCR
-    const processedImage = await sharp(imageBuffer)
-      .greyscale()
-      .normalize()
+    // Compress image to save costs (vision models charge per token/pixel)
+    console.log(
+      "📏 [Image Optimization] Original size:",
+      (imageBuffer.length / 1024).toFixed(2),
+      "KB",
+    );
+
+    const compressedImage = await sharp(imageBuffer)
+      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true }) // Max 1200px
+      .jpeg({ quality: 80 }) // Compress to JPEG
       .toBuffer();
 
-    console.log("✅ [OCR Service] Image preprocessed (greyscale + normalized)");
+    console.log(
+      "✅ [Image Optimization] Compressed size:",
+      (compressedImage.length / 1024).toFixed(2),
+      "KB",
+    );
+    console.log(
+      "💰 [Cost Savings] Reduced by:",
+      ((1 - compressedImage.length / imageBuffer.length) * 100).toFixed(1),
+      "%",
+    );
 
-    // Perform OCR
-    console.log("🔍 [OCR Service] Running Tesseract OCR...");
-    const result = await Tesseract.recognize(processedImage, "eng", {
-      logger: (m) => {
-        if (m.status === "recognizing text") {
-          console.log(`   OCR Progress: ${Math.round(m.progress * 100)}%`);
+    const base64Image = compressedImage.toString("base64");
+    const prompt = getVisionOCRPrompt();
+
+    // Try each vision model in priority order
+    for (const { provider, model } of VISION_MODEL_PRIORITY) {
+      try {
+        console.log(
+          `\n🔄 [Vision OCR] Attempting provider: ${provider}, model: ${model}`,
+        );
+
+        if (provider === AI_PROVIDERS.GEMINI) {
+          if (!genAI) {
+            console.log("⚠️  [Vision OCR] Gemini not configured, skipping");
+            continue;
+          }
+
+          const visionModel = genAI.getGenerativeModel({ model });
+
+          const result = await visionModel.generateContent([
+            prompt,
+            {
+              inlineData: {
+                data: base64Image,
+                mimeType: "image/jpeg",
+              },
+            },
+          ]);
+
+          const responseText = result.response.text();
+          console.log("\n📥 [Gemini Vision] Raw response:");
+          console.log("─".repeat(80));
+          console.log(responseText);
+          console.log("─".repeat(80));
+
+          const parsed = parseVisionResponse(responseText);
+          console.log(`✅ [Vision OCR] Success with ${provider}/${model}`);
+          console.log(
+            `📊 [Vision OCR] Extracted ${parsed.messages.length} messages`,
+          );
+
+          return parsed;
+        } else if (provider === AI_PROVIDERS.GROQ) {
+          const response = await groq.chat.completions.create({
+            model,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text" as const, text: prompt },
+                  {
+                    type: "image_url" as const,
+                    image_url: {
+                      url: `data:image/jpeg;base64,${base64Image}`,
+                    },
+                  },
+                ] as any, // Groq's types might not be fully updated for vision
+              },
+            ],
+            temperature: 0.3,
+            max_tokens: 1000,
+          });
+
+          const responseText = response.choices[0]?.message?.content || "";
+          console.log("\n📥 [Groq Vision] Raw response:");
+          console.log("─".repeat(80));
+          console.log(responseText);
+          console.log("─".repeat(80));
+
+          const parsed = parseVisionResponse(responseText);
+          console.log(`✅ [Vision OCR] Success with ${provider}/${model}`);
+          console.log(
+            `📊 [Vision OCR] Extracted ${parsed.messages.length} messages`,
+          );
+
+          return parsed;
         }
-      },
-    });
+      } catch (error: any) {
+        console.error(
+          `❌ [Vision OCR] ${provider}/${model} failed:`,
+          error.message,
+        );
+        // Continue to next model
+      }
+    }
 
-    const text = result.data.text.trim();
-    const confidence = result.data.confidence / 100; // Normalize to 0-1
-
-    console.log("✅ [OCR Service] Text recognition complete");
-
-    return { text, confidence };
+    throw new Error("All vision models failed");
   } catch (error: any) {
-    console.error("❌ [OCR Service] OCR Error:", error);
-    throw new Error(`OCR failed: ${error.message}`);
+    console.error("\n❌ [VISION OCR] Error:", error);
+    console.error("=".repeat(80) + "\n");
+    throw new Error(`Vision OCR failed: ${error.message}`);
   }
 };
 
 /**
- * Parses conversation from OCR text
- * Attempts to identify message boundaries and speakers
+ * Parse vision AI response into structured format
  */
-export const parseOCRConversation = (
-  text: string,
-): Array<{ sender: "user" | "other"; text: string }> => {
-  const lines = text.split("\n").filter((line) => line.trim().length > 0);
-  const messages: Array<{ sender: "user" | "other"; text: string }> = [];
-
-  for (const line of lines) {
-    // Skip very short lines (likely noise)
-    if (line.trim().length < 3) continue;
-
-    // Try to detect speaker indicators
-    const lowerLine = line.toLowerCase();
-
-    if (lowerLine.includes("you:") || lowerLine.includes("me:")) {
-      const text = line.substring(line.indexOf(":") + 1).trim();
-      if (text) {
-        messages.push({ sender: "user", text });
-      }
-    } else if (lowerLine.includes("them:") || lowerLine.includes("other:")) {
-      const text = line.substring(line.indexOf(":") + 1).trim();
-      if (text) {
-        messages.push({ sender: "other", text });
-      }
-    } else {
-      // If no clear indicator, treat as other person's message
-      messages.push({ sender: "other", text: line.trim() });
+const parseVisionResponse = (responseText: string): VisionOCRResult => {
+  try {
+    // Extract JSON from response
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No JSON found in vision response");
     }
-  }
 
-  return messages;
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Validate structure
+    if (!parsed.messages || !Array.isArray(parsed.messages)) {
+      throw new Error("Invalid response structure: missing messages array");
+    }
+
+    console.log("\n🔍 [Vision Parse] Extracted conversation:");
+    parsed.messages.forEach((msg: any, idx: number) => {
+      console.log(`   [${idx + 1}] ${msg.sender}: ${msg.text}`);
+    });
+
+    return {
+      platform: parsed.platform || "unknown",
+      messages: parsed.messages,
+      confidence: parsed.confidence || 0.8,
+    };
+  } catch (error: any) {
+    console.error("❌ [Vision Parse] Failed to parse response:", error.message);
+    throw new Error("Failed to parse vision AI response");
+  }
 };
 
 export default {
-  extractTextFromImage,
-  parseOCRConversation,
+  extractConversationFromImage,
 };

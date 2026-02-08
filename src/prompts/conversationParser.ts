@@ -44,16 +44,28 @@ Parse the conversation and return structured JSON.`;
 export const getBatchedParsingAndReplyPrompt = (
   conversationText: string,
   tone: string,
+  lastMessageWasUser: boolean = false,
   userIdentifier?: string,
 ): string => {
+  const perspectiveInstruction = lastMessageWasUser
+    ? "The LAST MESSAGE was sent by the USER. Generate follow-up messages to CONTINUE the conversation from the user's side."
+    : "The LAST MESSAGE was sent by the OTHER PERSON. Generate replies for the user to RESPOND to them.";
+
   return `You are a dating coach AI assistant. Perform TWO tasks:
 
 TASK 1: PARSE CONVERSATION
 Parse this chat export and identify messages. Skip <Media omitted> and system messages.
 ${userIdentifier ? `The user is: "${userIdentifier}"` : "Identify who is the user based on context."}
 
+CRITICAL: ${perspectiveInstruction}
+
 TASK 2: GENERATE REPLIES
 Based on the parsed conversation, generate 3 distinct reply suggestions in ${tone} tone.
+${
+  lastMessageWasUser
+    ? "These should be FOLLOW-UP messages that continue what the user just said."
+    : "These should be RESPONSES to what the other person just said."
+}
 
 Tone descriptions:
 - safe: Friendly, respectful, low-risk
