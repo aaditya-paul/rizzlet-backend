@@ -1,8 +1,8 @@
-import pool from "../config/database";
-import { config } from "../config";
-import { REQUEST_TYPES } from "../config/constants";
-import { AppError } from "../middleware/errorHandler";
-import { HTTP_STATUS } from "../config/constants";
+import pool from "../config/database.js";
+import { config } from "../config/index.js";
+import { REQUEST_TYPES } from "../config/constants.js";
+import { AppError } from "../middleware/errorHandler.js";
+import { HTTP_STATUS } from "../config/constants.js";
 
 /**
  * Track a usage event

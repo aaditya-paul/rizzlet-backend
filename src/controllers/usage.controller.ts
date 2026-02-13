@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/auth";
-import { getUserUsage } from "../services/usage.service";
-import { HTTP_STATUS } from "../config/constants";
+import { AuthRequest } from "../middleware/auth.js";
+import { getUserUsage } from "../services/usage.service.js";
+import { HTTP_STATUS } from "../config/constants.js";
 
 export const getUsageStats = async (
   req: AuthRequest,

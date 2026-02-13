@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import pool from "../config/database";
-import { config } from "../config";
-import { User, AuthTokenPayload } from "../models/types";
-import { AppError } from "../middleware/errorHandler";
-import { HTTP_STATUS } from "../config/constants";
+import pool from "../config/database.js";
+import { config } from "../config/index.js";
+import { User, AuthTokenPayload } from "../models/types.js";
+import { AppError } from "../middleware/errorHandler.js";
+import { HTTP_STATUS } from "../config/constants.js";
 
 const SALT_ROUNDS = 10;
 

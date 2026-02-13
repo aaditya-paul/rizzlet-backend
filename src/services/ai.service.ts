@@ -1,25 +1,25 @@
-import groq from "../config/llama";
-import genAI from "../config/gemini";
+import groq from "../config/llama.js";
+import genAI from "../config/gemini.js";
 import {
   AI_PROVIDERS,
   GEMINI_MODELS,
   MODEL_PRIORITY,
-} from "../config/constants";
+} from "../config/constants.js";
 import {
   ToneMode,
   ConversationContext,
   ReplyOption,
   GenerateReplyRequest,
   GenerateReplyResponse,
-} from "../models/types";
+} from "../models/types.js";
 import {
   getReplyGenerationPrompt,
   formatConversationForPrompt,
-} from "../prompts/replyGeneration";
+} from "../prompts/replyGeneration.js";
 import {
   getContextAnalysisPrompt,
   formatConversationForAnalysis,
-} from "../prompts/contextAnalysis";
+} from "../prompts/contextAnalysis.js";
 
 /**
  * Call AI model with automatic fallback support
@@ -371,7 +371,7 @@ export const parseAndGenerateReplies = async (
 
     // Import the batched prompt
     const { getBatchedParsingAndReplyPrompt } =
-      await import("../prompts/conversationParser");
+      await import("../prompts/conversationParser.js");
 
     const prompt = getBatchedParsingAndReplyPrompt(
       request.conversationText,

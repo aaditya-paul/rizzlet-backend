@@ -1,16 +1,16 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { config } from "./config";
-import { initDatabase } from "./config/database";
-import { errorHandler } from "./middleware/errorHandler";
-import { apiLimiter } from "./middleware/rateLimiter";
+import { config } from "./config/index.js";
+import { initDatabase } from "./config/database.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
 
 // Import routes
-import authRoutes from "./routes/auth.routes";
-import replyRoutes from "./routes/reply.routes";
-import usageRoutes from "./routes/usage.routes";
-import ocrRoutes from "./routes/ocr.routes";
+import authRoutes from "./routes/auth.routes.js";
+import replyRoutes from "./routes/reply.routes.js";
+import usageRoutes from "./routes/usage.routes.js";
+import ocrRoutes from "./routes/ocr.routes.js";
 
 const app: Application = express();
 

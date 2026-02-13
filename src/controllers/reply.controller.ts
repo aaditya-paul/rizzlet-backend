@@ -1,9 +1,9 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/auth";
-import { generateReplies } from "../services/ai.service";
-import { trackUsage, checkQuota } from "../services/usage.service";
-import { GenerateReplyRequest } from "../models/types";
-import { HTTP_STATUS, REQUEST_TYPES } from "../config/constants";
+import { AuthRequest } from "../middleware/auth.js";
+import { generateReplies } from "../services/ai.service.js";
+import { trackUsage, checkQuota } from "../services/usage.service.js";
+import { GenerateReplyRequest } from "../models/types.js";
+import { HTTP_STATUS, REQUEST_TYPES } from "../config/constants.js";
 
 export const generateReply = async (
   req: AuthRequest,
@@ -62,7 +62,7 @@ export const generateReply = async (
       console.log("   Requested replies:", request.count || 3);
 
       const { parseAndGenerateReplies } =
-        await import("../services/ai.service");
+        await import("../services/ai.service.js");
       result = await parseAndGenerateReplies(request);
     } else {
       // Use traditional structured conversation

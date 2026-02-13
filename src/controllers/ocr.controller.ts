@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/auth";
-import { extractConversationFromImage } from "../services/ocr.service";
-import { HTTP_STATUS } from "../config/constants";
+import { AuthRequest } from "../middleware/auth.js";
+import { extractConversationFromImage } from "../services/ocr.service.js";
+import { HTTP_STATUS } from "../config/constants.js";
 
 export const processImage = async (
   req: AuthRequest,

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodSchema } from "zod";
-import { HTTP_STATUS } from "../config/constants";
+import { HTTP_STATUS } from "../config/constants.js";
 
 export const validateRequest = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {

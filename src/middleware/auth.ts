@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { config } from "../config";
-import { AuthTokenPayload } from "../models/types";
-import { HTTP_STATUS } from "../config/constants";
+import { config } from "../config/index.js";
+import { AuthTokenPayload } from "../models/types.js";
+import { HTTP_STATUS } from "../config/constants.js";
 
 export interface AuthRequest extends Request {
   user?: AuthTokenPayload;

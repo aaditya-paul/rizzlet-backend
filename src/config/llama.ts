@@ -1,5 +1,5 @@
 import Groq from "groq-sdk";
-import { config } from "./index";
+import { config } from "./index.js";
 
 if (!config.groq.apiKey) {
   console.warn("⚠️  GROQ_API_KEY is not set. AI features will not work.");

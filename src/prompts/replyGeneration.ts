@@ -1,5 +1,5 @@
-import { ToneMode, ConversationContext } from "../models/types";
-import { TONE_DESCRIPTIONS } from "../config/constants";
+import { ToneMode, ConversationContext } from "../models/types.js";
+import { TONE_DESCRIPTIONS } from "../config/constants.js";
 
 /**
  * Generates system prompt for reply generation based on tone

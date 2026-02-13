@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { HTTP_STATUS } from "../config/constants";
+import { HTTP_STATUS } from "../config/constants.js";
 
 export class AppError extends Error {
   statusCode: number;

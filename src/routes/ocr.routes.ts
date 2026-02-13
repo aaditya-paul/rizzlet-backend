@@ -1,8 +1,8 @@
 import { Router } from "express";
 import multer from "multer";
-import { processImage } from "../controllers/ocr.controller";
-import { authMiddleware } from "../middleware/auth";
-import { aiLimiter } from "../middleware/rateLimiter";
+import { processImage } from "../controllers/ocr.controller.js";
+import { authMiddleware } from "../middleware/auth.js";
+import { aiLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 

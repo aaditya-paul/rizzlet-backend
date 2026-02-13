@@ -1,4 +1,4 @@
-import { ConversationContext } from "../models/types";
+import { ConversationContext } from "../models/types.js";
 
 /**
  * Generates prompt for analyzing conversation context

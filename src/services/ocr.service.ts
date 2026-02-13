@@ -1,7 +1,7 @@
-import groq from "../config/llama";
-import genAI from "../config/gemini";
-import { AI_PROVIDERS, VISION_MODEL_PRIORITY } from "../config/constants";
-import { getVisionOCRPrompt } from "../prompts/visionOCR";
+import groq from "../config/llama.js";
+import genAI from "../config/gemini.js";
+import { AI_PROVIDERS, VISION_MODEL_PRIORITY } from "../config/constants.js";
+import { getVisionOCRPrompt } from "../prompts/visionOCR.js";
 import sharp from "sharp";
 
 interface VisionOCRResult {
