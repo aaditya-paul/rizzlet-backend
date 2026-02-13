@@ -26,7 +26,7 @@ app.use(
   cors({
     origin:
       config.nodeEnv === "production"
-        ? ["https://rizzlet-web.vercel.app"] // Update with your frontend domain
+        ? ["https://rizzlet.aaditya-paul.in"] // Update with your frontend domain
         : [
             "http://localhost:3000",
             "http://localhost:5173",
