@@ -33,6 +33,7 @@ app.use(
             "http://localhost:5432",
             "http://10.119.159.96:3000",
             "https://rizzlet-web.vercel.app",
+            "https://rizzlet.aaditya-paul.in",
           ],
     credentials: true,
   }),
