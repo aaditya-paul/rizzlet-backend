@@ -143,7 +143,10 @@ export const unifiedAuth = async (
     }
   } catch (error: any) {
     if (error instanceof AppError) throw error;
-    throw new AppError("Authentication failed", HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    throw new AppError(
+      "Authentication failed",
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    );
   }
 };
 

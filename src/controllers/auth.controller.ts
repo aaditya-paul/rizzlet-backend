@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { registerUser, loginUser, unifiedAuth } from "../services/auth.service.js";
+import {
+  registerUser,
+  loginUser,
+  unifiedAuth,
+} from "../services/auth.service.js";
 import { HTTP_STATUS } from "../config/constants.js";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -58,7 +62,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const authenticate = async (req: Request, res: Response): Promise<void> => {
+export const authenticate = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { email, password } = req.body;
 
