@@ -101,7 +101,54 @@ const generateToken = (userId: string, email: string): string => {
   return jwt.sign(payload, config.jwt.secret as jwt.Secret, options);
 };
 
+/**
+ * Unified auth - automatically login or register
+ */
+export const unifiedAuth = async (
+  email: string,
+  password: string,
+): Promise<{ user: User; token: string; isNewUser: boolean }> => {
+  try {
+    // Check if user exists
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    if (result.rows.length > 0) {
+      // User exists - login
+      const user = result.rows[0];
+
+      // Verify password
+      const isValid = await bcrypt.compare(password, user.password_hash);
+
+      if (!isValid) {
+        throw new AppError("Invalid credentials", HTTP_STATUS.UNAUTHORIZED);
+      }
+
+      const token = generateToken(user.id, user.email);
+      return { user, token, isNewUser: false };
+    } else {
+      // User doesn't exist - register
+      const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
+
+      const insertResult = await pool.query(
+        "INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at, updated_at",
+        [email, password_hash],
+      );
+
+      const user = insertResult.rows[0];
+      const token = generateToken(user.id, user.email);
+
+      return { user, token, isNewUser: true };
+    }
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    throw new AppError("Authentication failed", HTTP_STATUS.INTERNAL_SERVER_ERROR);
+  }
+};
+
 export default {
   registerUser,
   loginUser,
+  unifiedAuth,
 };
